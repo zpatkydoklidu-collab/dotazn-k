@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jak je na tom tvá úzkost?</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --surface: #ffffff;
+    --surface2: #eef4f0;
+    --accent: #4a7c6b;
+    --accent2: #6b9e8c;
+    --accent-light: #d4e8e0;
+    --text: #2c3830;
+    --text-muted: #7a8c84;
+    --border: #dde8e3;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+      radial-gradient(ellipse at 10% 10%, rgba(74,124,107,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 90%, rgba(107,158,140,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 620px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* INTRO */
+  .intro {
+    text-align: center;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .intro-tag {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 6px 18px;
+    border-radius: 100px;
+    margin-bottom: 36px;
+    font-weight: 500;
+  }
+
+  .intro h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .intro h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .deco-line {
+    width: 36px;
+    height: 2px;
+    background: var(--accent);
+    margin: 0 auto 28px;
+    border-radius: 2px;
+    opacity: 0.4;
+  }
+
+  .intro p {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+    max-width: 460px;
+    margin: 0 auto 44px;
+  }
+
+  .btn-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 15px 34px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-start:hover {
+    background: var(--accent2);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(74,124,107,0.25);
+  }
+
+  .intro-note {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* QUESTIONS */
+  .question-screen { display: none; }
+
+  .progress-bar {
+    width: 100%;
+    height: 3px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 44px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .question-num {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .question-text {
+    font-family: 'Lora', serif;
+    font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .question-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  .q-spacer { height: 24px; }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 15px 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.93rem;
+    line-height: 1.55;
+    color: var(--text);
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+  }
+
+  .option:hover {
+    border-color: var(--accent2);
+    background: var(--surface2);
+    transform: translateX(3px);
+  }
+
+  .option.selected {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .option-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .option-check {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 50%;
+    margin-top: 2px;
+    transition: all 0.2s ease;
+  }
+
+  .option.selected .option-check {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(74,124,107,0.15);
+  }
+
+  .open-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    resize: none;
+    min-height: 110px;
+    transition: border-color 0.2s ease;
+    outline: none;
+  }
+
+  .open-textarea:focus { border-color: var(--accent2); }
+  .open-textarea::placeholder { color: var(--text-muted); }
+
+  .btn-next {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 26px;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 13px 28px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .btn-next.active { opacity: 1; pointer-events: all; }
+  .btn-next.active:hover {
+    background: var(--accent2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(74,124,107,0.25);
+  }
+
+  /* RESULT */
+  .result-screen {
+    display: none;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .result-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .result-type {
+    font-family: 'Lora', serif;
+    font-size: clamp(1.5rem, 4.5vw, 2.4rem);
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .result-type span { color: var(--accent); font-style: italic; }
+
+  .result-sub {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 26px;
+  }
+
+  .result-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 26px 28px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  .result-card p {
+    font-size: 0.96rem;
+    line-height: 1.85;
+    color: #4a5c54;
+  }
+
+  .result-insight {
+    background: var(--surface2);
+    border: 1.5px solid var(--accent-light);
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 26px;
+  }
+
+  .result-insight-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .result-insight p {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .btn-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 17px 36px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    margin-bottom: 14px;
+  }
+
+  .btn-cta:hover {
+    background: var(--accent2);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(74,124,107,0.25);
+  }
+
+  .result-note {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- INTRO -->
+  <div class="intro" id="intro">
+    <div class="intro-tag">Bezplatný dotazník</div>
+    <h1>Jak je na tom<br><em>tvá úzkost?</em></h1>
+    <div class="deco-line"></div>
+    <p>Pamatuji si sebe na začátku – nevěděl jsem co se mi děje, byl jsem zmatený a myslel si, že se toho nikdy nezbavím. Tenhle dotazník ti pomůže zjistit, co přesně tě drží v kruhu a proč dosavadní pokusy možná nefungovaly.</p>
+    <button class="btn-start" onclick="startQuiz()">
+      Zjistit výsledek
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+    <p class="intro-note">Zabere to asi 2 minuty · Zdarma</p>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div class="question-screen" id="quiz">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress" style="width: 0%"></div>
+    </div>
+    <div id="question-container"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">
+      Pokračovat
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-screen" id="result"></div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    id: 1,
+    text: "Jak dlouho se s tím potýkáš?",
+    type: "single",
+    options: [
+      "Pár měsíců – nastoupilo to relativně nedávno",
+      "Rok nebo dva – přichází a odchází, ale nevymizí",
+      "Několik let – je to součást mého života tak dlouho, že skoro nevím jak to bylo bez toho",
+      "Upřímně? Ani nevím jak to pojmenovat – prostě mi něco není v pořádku"
+    ]
+  },
+  {
+    id: 2,
+    text: "Co tě trápí víc?",
+    type: "single",
+    options: [
+      "Spíše fyzické příznaky – například bušení srdce, závratě, dušnost, třes nebo nevolnost",
+      "Spíše psychické příznaky – například myšlenky v kruhu, strach, přemýšlení nebo pocit nereálnosti",
+      "Obojí stejně – tělo i hlava jedou naplno"
+    ]
+  },
+  {
+    id: 3,
+    text: "Který příznak tě trápí úplně nejvíc?",
+    sub: "Napiš vlastními slovy – třeba jen jedno slovo. Není to test.",
+    type: "open"
+  },
+  {
+    id: 4,
+    text: "Když přijde ten nepříjemný stav, co děláš jako první?",
+    type: "single",
+    options: [
+      "Snažím se ho zastavit – dýchám, uklidňuji se, hledám rychlé řešení",
+      "Začnu přemýšlet proč to přišlo a co to asi znamená",
+      "Odcházím nebo se tomu příště raději vyhnu",
+      "Čekám a doufám, že to přejde samo",
+      "Snažím se odreagovat – telefon, seriál, cokoli jiného"
+    ],
+    result_map: [0, 1, 2, 3, 3]
+  },
+  {
+    id: 5,
+    text: "Už jsi někdy hledal pomoc nebo řešení?",
+    type: "single",
+    options: [
+      "Ne, tohle je můj první krok",
+      "Četl jsem o tom nebo sledoval videa na internetu",
+      "Byl jsem u psychologa nebo psychiatra",
+      "Zkoušel jsem různé techniky – dýchání, meditace, kurzy",
+      "Ano, hodně věcí – a zatím nic pořádně nezabralo"
+    ]
+  },
+  {
+    id: 6,
+    text: "Co si v hloubi duše myslíš – jde se z toho dostat?",
+    type: "single",
+    options: [
+      "Věřím, že ano – jen ještě nevím jak",
+      "Někdy věřím, někdy ne – záleží na dni",
+      "Upřímně pochybuji – ale zkusím to"
+    ]
+  },
+  {
+    id: 7,
+    text: "Co by se ve tvém životě změnilo, kdyby úzkost zmizela?",
+    sub: "Napiš klidně jen jednu větu. Nebo dvě.",
+    type: "open"
+  }
+];
+
+const results = [
+  {
+    title: "Máš sklony k <span>přehnanému boji</span>",
+    sub: "– a právě to úzkost udržuje aktivní.",
+    desc: "A já přesně vím, jak to vypadá. Taky jsem byl ten typ, co to prostě nevzdá. Přijde vlna, a ty okamžitě reaguješ – dýcháš, uklidňuješ se, hledáš techniku, která to konečně zastaví. A když nezabere, zkoušíš další. A další. Jenže tvůj nervový systém to celé sleduje a říká si: on bojuje, takže to musí být fakt nebezpečné. A přidá na intenzitě. Čím víc se snažíš, tím silnější to je. Není to tvoje chyba – prostě tě nikdo nenaučil, že tohle nefunguje. Já jsem několik let dělal přesně to samé, než jsem pochopil, že řešení není více snahy. Je to úplně jiný přístup. A ten tě tady čeká.",
+    insight: "Přestat bojovat není vzdání se. Je to to nejtěžší a zároveň nejúčinnější, co můžeš udělat."
+  },
+  {
+    title: "Máš sklony k <span>přehnanému analyzování</span>",
+    sub: "– a právě to úzkost udržuje aktivní.",
+    desc: "Tipuju, že o úzkosti víš víc než většina lidí ve tvém okolí. Googluješ příznaky, čteš články, sleduješ videa, analyzuješ co se v tobě děje a proč. A přesto – pořád ti to není dobře. Říkáš si: vím přece, že je to jen adrenalin, tak proč to sakra nepřestane? Já to znám. Strávil jsem roky hledáním odpovědí v hlavě na něco, co se odehrává v těle. Tvůj mozek se snaží logicky vyřešit problém, který logika nevyřeší. A to nekonečné přemýšlení samo o sobě drží nervový systém v pohotovosti – přilévá olej do ohně, i když si myslíš, že hasíš. Nejde o to, že jsi málo chytrý. Jde o to, že jsi příliš dlouho hledal ve špatném místě.",
+    insight: "Nepotřebuješ více informací. Potřebuješ jiný vztah k těm, co už máš. A to se nedá přečíst – musí se to zažít."
+  },
+  {
+    title: "Máš sklony k <span>přehnanému vyhýbání</span>",
+    sub: "– a právě to úzkost udržuje aktivní.",
+    desc: "Začalo to možná jednou situací, která byla prostě moc. A od té doby si nevědomky stavíš seznam míst, lidí nebo situací, kde by to mohlo přijít. Vyhýbáš se jim. Logicky – proč jít tam, kde je ti špatně, když to jde obejít? Jenže tvůj mozek si z každého vyhnutí udělá poznámku: správně, tam to bylo nebezpečné. A příště přidá další místo na seznam. A další. Svět se zmenšuje pomalu, skoro nepostřehnutelně – a najednou zjistíš, že prostor, kde se cítíš bezpečně, je čím dál menší. Já vím, jak se to cítí. A vím taky, že z toho cesta vede ven. Postupně, bez toho, abys musel hned skočit do nejhoršího.",
+    insight: "Tvůj mozek se tohle naučil. A co se naučil, se dá odnaučit. Nestačí ale vědět jak – musíš to zažít v praxi, krok po kroku."
+  },
+  {
+    title: "Máš sklony k <span>přehnanému odreagování</span>",
+    sub: "– a právě to úzkost udržuje aktivní.",
+    desc: "Hádám, že jsi toho už hodně zkoušel. Psycholog, léky, techniky, knihy, videa. Chvíli to možná vypadalo nadějně, pak to zase přišlo zpátky. A teď jsi v bodě, kdy už ani moc nebojuješ – jen tak nějak přežíváš. Zapínáš telefon, pouštíš seriál, děláš cokoli, aby ses nemusel cítit to, co cítíš. Navenek možná funguješ normálně, ale uvnitř je buď prázdno, nebo ten tichý, vyčerpávající strach na pozadí. Chci ti říct jednu věc, která mě kdysi překvapila: tohle vyčerpání není selhání. Je to přirozený výsledek toho, když člověk dlouho bojuje špatnou taktikou. A paradoxně – člověk, který přestal bojovat, je blíž uzdravení než ten, kdo pořád zuřivě hledá. Já jsem byl přesně tam kde jsi teď. A právě proto vím, že cesta vede dál.",
+    insight: "Únava ze snahy je signál, ne rozsudek. Někdy musíme přestat dělat to, co nefunguje, abychom mohli zkusit něco jiného."
+  }
+];
+
+let currentQ = 0;
+let answers = {};
+let selectedResult = 0;
+
+function startQuiz() {
+  document.getElementById('intro').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const total = questions.length;
+  document.getElementById('progress').style.width = (currentQ / total * 100) + '%';
+
+  const btnNext = document.getElementById('btn-next');
+  btnNext.classList.remove('active');
+
+  let html = `
+    <div class="question-num">Otázka ${currentQ + 1} z ${total}</div>
+    <div class="question-text">${q.text}</div>
+    ${q.sub ? `<div class="question-sub">${q.sub}</div>` : '<div class="q-spacer"></div>'}
+  `;
+
+  if (q.type === 'open') {
+    html += `<textarea class="open-textarea" id="open-answer" placeholder="Napiš sem..." oninput="checkOpen()">${answers[q.id] || ''}</textarea>`;
+    setTimeout(() => document.getElementById('btn-next').classList.add('active'), 50);
+  } else {
+    html += '<div class="options">';
+    q.options.forEach((opt, i) => {
+      const sel = answers[q.id] === i;
+      html += `
+        <button class="option ${sel ? 'selected' : ''}" onclick="selectOption(${i})">
+          <div class="option-inner">
+            <span class="option-check"></span>
+            <span>${opt}</span>
+          </div>
+        </button>`;
+    });
+    html += '</div>';
+    if (answers[q.id] !== undefined) btnNext.classList.add('active');
+  }
+
+  document.getElementById('question-container').innerHTML = html;
+}
+
+function selectOption(index) {
+  const q = questions[currentQ];
+  answers[q.id] = index;
+  if (q.result_map !== undefined) selectedResult = q.result_map[index];
+  renderQuestion();
+  document.getElementById('btn-next').classList.add('active');
+}
+
+function checkOpen() {
+  answers[questions[currentQ].id] = document.getElementById('open-answer').value.trim();
+}
+
+function nextQuestion() {
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz').style.display = 'none';
+  const r = results[selectedResult];
+  const el = document.getElementById('result');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="result-label">Tvůj výsledek</div>
+    <div class="result-type">${r.title}</div>
+    <div class="result-sub">${r.sub}</div>
+    <div class="result-card"><p>${r.desc}</p></div>
+    <div class="result-insight">
+      <div class="result-insight-label">Na závěr</div>
+      <p>${r.insight}</p>
+    </div>
+    <a href="#" class="btn-cta">
+      Chci začít první týden zdarma
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <p class="result-note">První modul odemčen ihned · Bez závazků · 7 dní zdarma</p>
+  `;
+}
+</script>
+</body>
+</html>
