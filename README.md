@@ -1,1 +1,1 @@
-# dotazn-k
+# dotaznik
